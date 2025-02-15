@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOTP Manager</title>
+    <style>
+        :root {
+            --background: #f0f2f5;
+            --card-bg: #ffffff;
+            --primary: #2d3436;
+            --secondary: #636e72;
+            --highlight: #0984e3;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--background);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .totp-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .totp-entry {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.1s ease;
+        }
+
+        .totp-entry:hover {
+            transform: translateY(-2px);
+        }
+
+        .service-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .service-name {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        .otp-code {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--highlight);
+            letter-spacing: 2px;
+        }
+
+        .timer-bar {
+            height: 3px;
+            background: rgba(9, 132, 227, 0.2);
+            border-radius: 2px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+
+        .timer-progress {
+            height: 100%;
+            width: 50%;
+            background: var(--highlight);
+            transition: width 1s linear;
+        }
+
+        .copy-button {
+            background: none;
+            border: none;
+            color: var(--secondary);
+            cursor: pointer;
+            padding: 4px;
+            margin-left: 8px;
+        }
+
+        .copy-button:hover {
+            color: var(--highlight);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="totp-list">
+            <!-- TOTPエントリーの例 -->
+            <div class="totp-entry">
+                <div class="service-info">
+                    <span class="service-name">GitHub Account</span>
+                    <button class="copy-button" title="コピー">📋</button>
+                </div>
+                <div class="otp-code">8 5 2 7 4 1</div>
+                <div class="timer-bar">
+                    <div class="timer-progress" style="width: 30%"></div>
+                </div>
+            </div>
+
+            <div class="totp-entry">
+                <div class="service-info">
+                    <span class="service-name">Google Workspace</span>
+                    <button class="copy-button" title="コピー">📋</button>
+                </div>
+                <div class="otp-code">3 9 0 6 2 8</div>
+                <div class="timer-bar">
+                    <div class="timer-progress" style="width: 70%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // コピーボタンの機能
+        document.querySelectorAll('.copy-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const code = e.target.closest('.totp-entry').querySelector('.otp-code').textContent;
+                navigator.clipboard.writeText(code.replace(/ /g, ''));
+            });
+        });
+
+        // タイマーの更新（例）
+        function updateTimers() {
+            document.querySelectorAll('.timer-progress').forEach(progress => {
+                const currentWidth = parseFloat(progress.style.width);
+                const newWidth = currentWidth - (100 / 30); // 30秒カウントダウン
+                progress.style.width = Math.max(newWidth, 0) + '%';
+            });
+        }
+
+        setInterval(updateTimers, 1000);
+    </script>
+</body>
+</html>
