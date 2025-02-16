@@ -1,35 +1,47 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from 'react';
 
-function App() {
-  const [count, setCount] = useState(0)
+declare global {
+  interface Window {
+    electronAPI: {
+      ping: () => Promise<string>;
+    };
+  }
+}
+import { useTimer } from './hooks/useTimer';
+import { TOTPEntry } from './types';
+import { TOTPEntryItem } from './components/ui/TOTPEntryItem';
+
+const App = () => {
+  const [entries] = useState<TOTPEntry[]>([
+    { id: '1', serviceName: 'GitHub Account', code: '852 741' },
+    { id: '2', serviceName: 'Google Workspace', code: '390 628' },
+  ]);
+  const { now, getRemainingTime } = useTimer();
+
+useEffect(() => {
+  async function fetchData() {
+    const response = await window.electronAPI.ping();
+    console.log(response);
+  }
+
+  fetchData();
+}, []);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="mx-auto max-w-2xl">
+        <div className="space-y-3">
+          {entries.map((entry) => (
+            <TOTPEntryItem
+              key={entry.id}
+              entry={entry}
+              remainingTime={getRemainingTime()}
+            />
+          ))}
+        </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    </div>
+  );
+};
 
-export default App
+export default App;

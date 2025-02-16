@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:electron": "rm -rf dist && vite build && electron main.js --no-sandbox",
+    "dev:electron": "rm -rf dist && vite build && electron main.mjs --no-sandbox",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
