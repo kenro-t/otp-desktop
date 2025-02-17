@@ -1,5 +1,5 @@
-import { contextBridge, ipcRenderer } from 'electron';
-// const { ipcRenderer, contextBridge } = require('electron');
+// import { contextBridge, ipcRenderer } from 'electron';
+const { ipcRenderer, contextBridge } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
   ping: () => {

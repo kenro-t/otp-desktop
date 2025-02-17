@@ -22,5 +22,6 @@ app.whenReady().then(() => {
     }
   });
 
-  browserWindow.loadFile('./dist/index.html');
+  // browserWindow.loadFile('./dist/index.html');
+  browserWindow.loadURL('http://localhost:5173')
 });
