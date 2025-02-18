@@ -1,6 +1,0 @@
-npm create vite@latest
-
-npm install --save-dev electron
-
-npm install
-
