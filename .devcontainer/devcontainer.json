@@ -2,9 +2,9 @@
 	"name": "totp-desktop-dev",
 	"dockerFile": "./Dockerfile",
 	"postAttachCommand": "/bin/bash -c 'source .devcontainer/startup.sh'",
-	"remoteUser": "node",
+	"remoteUser": "root",
 	"remoteEnv": {
-		"DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus"
+		"DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/0/bus"
 	},
 	"mounts": [
 		"source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,consistency=cached"
