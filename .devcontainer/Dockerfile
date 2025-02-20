@@ -8,4 +8,5 @@ RUN sudo apt update && sudo apt -y install \
     libxss-dev \
     libasound2 \
     dbus-x11 \
-    dbus 
+    dbus \
+    xdg-utils
