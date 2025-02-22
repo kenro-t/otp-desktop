@@ -1,34 +1,28 @@
-import Versions from './components/Versions'
-import electronLogo from './assets/electron.svg'
+import { useState } from 'react'
+
+import { TOTPEntryItem } from './components/ui/TOTPEntryItem'
+import { useTimer } from './hooks/useTimer'
+import { TOTPEntry } from './types'
 
 function App(): JSX.Element {
   const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
 
+  const [entries] = useState<TOTPEntry[]>([
+    { id: '1', serviceName: 'GitHub Account', code: '852 741' },
+    { id: '2', serviceName: 'Google Workspace', code: '390 628' }
+  ])
+  const { now, getRemainingTime } = useTimer()
+
   return (
-    <>
-      <img alt="logo" className="logo" src={electronLogo} />
-      <div className="creator">Powered by electron-vite</div>
-      <div className="text">
-        Build an Electron app with <span className="react">React</span>
-        &nbsp;and <span className="ts">TypeScript</span>
-      </div>
-      <p className="tip">
-        Please try pressing <code>F12</code> to open the devTool
-      </p>
-      <div className="actions">
-        <div className="action">
-          <a href="https://electron-vite.org/" target="_blank" rel="noreferrer">
-            Documentation
-          </a>
-        </div>
-        <div className="action">
-          <a target="_blank" rel="noreferrer" onClick={ipcHandle}>
-            Send IPC
-          </a>
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="mx-auto max-w-2xl">
+        <div className="space-y-3">
+          {entries.map((entry) => (
+            <TOTPEntryItem key={entry.id} entry={entry} remainingTime={getRemainingTime()} />
+          ))}
         </div>
       </div>
-      <Versions></Versions>
-    </>
+    </div>
   )
 }
 
