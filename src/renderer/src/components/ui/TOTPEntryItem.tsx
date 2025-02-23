@@ -16,7 +16,7 @@ export const TOTPEntryItem = ({ entry, remainingTime }: TOTPEntryItemProps) => {
           {entry.serviceName}
         </h3>
         <button
-          onClick={() => handleCopy(entry.code)}
+          onClick={() => handleCopy(entry.token)}
           className="text-gray-500 hover:text-blue-500"
           aria-label="Copy"
         >
@@ -37,7 +37,7 @@ export const TOTPEntryItem = ({ entry, remainingTime }: TOTPEntryItemProps) => {
       </div>
 
       <div className="font-mono text-2xl font-bold tracking-wider text-blue-600">
-        {entry.code}
+        {entry.token}
       </div>
 
       <div className="mt-3 h-1 rounded bg-blue-100">
