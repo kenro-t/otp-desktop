@@ -4,14 +4,14 @@ import { useCopyToClipboard } from '../../hooks/useCopyToClipboard'
 type TOTPEntryItemProps = {
   entry: TOTPEntry
   remainingTime: number
-  now: number
+  timeKey: number
 }
 
-export const TOTPEntryItem = ({ entry, remainingTime, now }: TOTPEntryItemProps) => {
+export const TOTPEntryItem = ({ entry, remainingTime, timeKey }: TOTPEntryItemProps) => {
   const { handleCopy } = useCopyToClipboard()
 
   return (
-    <div className="transform rounded-lg bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5">
+    <div className="transform rounded-lg bg-white p-4 shadow-sm transition-all">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-base font-semibold text-gray-800">{entry.serviceName}</h3>
         <button
@@ -33,12 +33,11 @@ export const TOTPEntryItem = ({ entry, remainingTime, now }: TOTPEntryItemProps)
       <div className="font-mono text-2xl font-bold tracking-wider text-blue-600">{entry.token}</div>
       <div className="mt-3 h-1 rounded bg-blue-100">
         <div
-          className="h-full rounded bg-blue-500 transition-width duration-1000 ease-linear"
+          key={timeKey}
+          className="h-full rounded bg-blue-500 duration-100 ease-linear"
           style={{
-            width: `${(remainingTime / 31) * 100}%`,
-            transition: remainingTime === 30 ? 'none' : 'width 1s linear'
+            width: `${(remainingTime / 30) * 100}%`
           }}
-          key={Math.floor(now / 30000)}
         />
       </div>
     </div>

@@ -1,15 +1,40 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react'
 
-export const useTimer = (interval = 1000) => {
-  const [now, setNow] = useState(Date.now());
+import { performanceToUnixTime } from '../../../shared/utils/time'
+
+export const useTimer = () => {
+  const [now, setNow] = useState(performanceToUnixTime(performance))
+  const [timeKey, setTimeKey] = useState(0)
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setNow(Date.now());
-    }, interval);
+    let animationFrameId: number
+    let lastUpdate = performanceToUnixTime(performance)
 
-    return () => clearInterval(timer);
-  }, [interval]);
+    const updateTime = () => {
+      const currentTime = performanceToUnixTime(performance)
+      const elapsed = currentTime - lastUpdate
 
-  return { now, getRemainingTime: () => 30 - Math.floor((now / 1000) % 30) };
-};
+      if (elapsed >= 100) {
+        setNow(currentTime)
+        lastUpdate = currentTime
+
+        if (Math.floor(currentTime / 1000) % 30 === 0) {
+          setTimeKey((prev) => prev + 1)
+        }
+      }
+
+      animationFrameId = requestAnimationFrame(updateTime)
+    }
+
+    animationFrameId = requestAnimationFrame(updateTime)
+    return () => cancelAnimationFrame(animationFrameId)
+  }, [])
+
+  return {
+    timeKey,
+    getRemainingTime: () => {
+      const currentTime = now / 1000
+      return 30 - (currentTime % 30)
+    }
+  }
+}

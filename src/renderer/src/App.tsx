@@ -6,7 +6,7 @@ import { TOTPEntry } from './types'
 
 function App(): JSX.Element {
   const [entries, setEntries] = useState<TOTPEntry[]>([])
-  const { now, getRemainingTime } = useTimer()
+  const { timeKey, getRemainingTime } = useTimer()
 
   useEffect(() => {
     const getAccounts = window.electron.ipcRenderer.on('accounts', (_, account) => {
@@ -20,7 +20,7 @@ function App(): JSX.Element {
       <div className="mx-auto max-w-2xl">
         <div className="space-y-3">
           {entries.map((entry) => (
-            <TOTPEntryItem key={entry.id} entry={entry} remainingTime={getRemainingTime()} now={now} />
+            <TOTPEntryItem key={entry.id} entry={entry} remainingTime={getRemainingTime()} timeKey={timeKey} />
           ))}
         </div>
       </div>
