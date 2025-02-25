@@ -1,12 +1,16 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, Menu, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
+import { getAccounts } from './ipc-handlers/totp'
+
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
+    // width: 900,
+    // height: 670,
+    width: 1200,
     height: 670,
     show: false,
     autoHideMenuBar: true,
@@ -16,6 +20,10 @@ function createWindow(): void {
       sandbox: false
     }
   })
+
+  if (is.dev) {
+    mainWindow.webContents.openDevTools()
+  }
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
@@ -33,6 +41,37 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  function watchValue(obj, propName, func) {
+    let value = obj[propName]
+    Object.defineProperty(obj, propName, {
+      get: () => value,
+      set: (newValue) => {
+        const oldValue = value
+        value = newValue
+        func(oldValue, newValue)
+      },
+      configurable: true
+    })
+  }
+
+  const accounts = [{ id: '1', serviceName: 'GitHub Account', token: '123456' }]
+  mainWindow.webContents.on('dom-ready', () => {
+    mainWindow.webContents.send('accounts', accounts)
+  })
+
+  watchValue(accounts[0], 'token', () => {
+    mainWindow.webContents.send('accounts', accounts)
+  })
+
+  const polling = () => {
+    setTimeout(async () => {
+      let token = await getAccounts()
+      accounts[0].token = token[0].token
+      polling()
+    }, 400)
+  }
+  polling()
 }
 
 // This method will be called when Electron has finished
