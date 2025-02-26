@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, Menu, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -42,36 +42,40 @@ function createWindow(): void {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
 
-  function watchValue(obj, propName, func) {
-    let value = obj[propName]
-    Object.defineProperty(obj, propName, {
-      get: () => value,
-      set: (newValue) => {
-        const oldValue = value
-        value = newValue
-        func(oldValue, newValue)
-      },
-      configurable: true
+  // DOM が読み込まれたらアカウント情報を取得して監視する
+  mainWindow.webContents.on('dom-ready', async () => {
+    // 初回起動時
+    const accounts = await getAccounts()
+    mainWindow.webContents.send('accounts', accounts)
+
+    // オブジェクト変更検知用Proxy
+    const watchedAccounts = accounts.map((account) => {
+      return new Proxy(account, {
+        set(target, prop, value) {
+          if (prop === 'token') {
+            Reflect.set(target, prop, value)
+            mainWindow.webContents.send('accounts', accounts)
+            return true
+          }
+          return Reflect.set(target, prop, value)
+        }
+      })
     })
-  }
 
-  const accounts = [{ id: '1', serviceName: 'GitHub Account', token: '123456' }]
-  mainWindow.webContents.on('dom-ready', () => {
-    mainWindow.webContents.send('accounts', accounts)
+    // 500ms ごとにアカウント情報を取得して監視する
+    const polling = () => {
+      setTimeout(async () => {
+        const pollingAccounts = await getAccounts()
+        watchedAccounts.map((watchedAccount) => {
+          watchedAccount.token = pollingAccounts.find(
+            (pollingAccount) => pollingAccount.id === watchedAccount.id
+          )?.token
+        })
+        polling()
+      }, 500)
+    }
+    polling()
   })
-
-  watchValue(accounts[0], 'token', () => {
-    mainWindow.webContents.send('accounts', accounts)
-  })
-
-  const polling = () => {
-    setTimeout(async () => {
-      let token = await getAccounts()
-      accounts[0].token = token[0].token
-      polling()
-    }, 400)
-  }
-  polling()
 }
 
 // This method will be called when Electron has finished
