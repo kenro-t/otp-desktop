@@ -1,3 +1,4 @@
+import * as fs from 'fs/promises'
 import * as OTPAuth from 'otpauth'
 
 import { performanceToUnixTime } from '../../shared/utils/time'
@@ -58,4 +59,17 @@ export async function getAccounts(): Promise<Account[]> {
   return new Promise<Account[]>((resolve) => {
     resolve(accounts)
   })
+}
+
+export async function registerAccount(): Promise<void> {
+  // TODO: 暗号化処理を実装する
+  try {
+    // 保存ファイルパス
+    const privateKey = 'my-secret-private-key'
+    const filePath = '/workspaces/totp-desktop/passwd/encrypted-private-key.bin'
+
+    await fs.writeFile(filePath, privateKey)
+  } catch (error) {
+    throw new Error(`Good Example Error: ${error.message}`)
+  }
 }
