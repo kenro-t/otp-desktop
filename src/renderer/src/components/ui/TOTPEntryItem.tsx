@@ -16,7 +16,7 @@ export const TOTPEntryItem = ({ entry, remainingTime, timeKey }: TOTPEntryItemPr
         <h3 className="text-base font-semibold text-gray-800">{entry.serviceName}</h3>
         <button
           onClick={() => handleCopy(entry.token)}
-          className="text-gray-500 hover:text-blue-500"
+          className="text-gray-500 hover:text-blue-500 cursor-pointer"
           aria-label="Copy"
         >
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
