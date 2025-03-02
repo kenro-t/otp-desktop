@@ -1,7 +1,9 @@
-import * as fs from 'fs/promises'
 import * as OTPAuth from 'otpauth'
+import Store from 'electron-store'
 
 import { performanceToUnixTime } from '../../shared/utils/time'
+import { SecureKeyStorage } from '../lib/SecureKeyStorage'
+
 
 // Account はアカウント情報を表す型
 interface Account {
@@ -16,60 +18,159 @@ interface TOTP extends OTPAuth.TOTP {
 }
 
 export async function getAccounts(): Promise<Account[]> {
-  // TOTPアカウントのリストMock
-  const TOTPAccounts: TOTP[] = [
-    Object.assign(
-      new OTPAuth.TOTP({
-        issuer: 'ACME',
-        label: 'Alice',
-        algorithm: 'SHA1',
-        digits: 6,
-        period: 30,
-        secret: OTPAuth.Secret.fromBase32('US3WHSG7X5KAPV27VANWKQHF3SH3HULL') // dummy secret
-      }),
-      {
-        id: '1',
-        serviceName: 'GitHub Account'
+  // OTPAuthスキーマ
+  const store = new Store<OTPAuthSchema>({
+    schema: {
+      services: {
+        type: 'object',
+        default: {}
       }
-    ),
-    Object.assign(
+    }
+  })
+
+  const secureKeyStorage = new SecureKeyStorage()
+
+  const TOTPAccounts: TOTP[] = Object.entries(store.get('services')).map(([key, value]) => {
+    const secret = secureKeyStorage.getKey(key)
+    if (!secret) {
+      return
+    }
+
+    return Object.assign(
       new OTPAuth.TOTP({
-        issuer: 'ACME',
-        label: 'Alice',
+        issuer: value.issuer,
+        label: value.serviceName,
         algorithm: 'SHA1',
-        digits: 6,
-        period: 30,
-        secret: OTPAuth.Secret.fromBase32('US3WHSG7X5KAPV27VANWKQHF3SH3HULD') // dummy secret
+        digits: value.digits,
+        period: value.period,
+        secret: OTPAuth.Secret.fromBase32(secret)
       }),
       {
-        id: '2',
-        serviceName: 'Google Account'
+        id: key,
+        serviceName: value.serviceName
       }
     )
-  ]
+  }) as TOTP[]
 
-  const accounts = TOTPAccounts.map((totp) => {
-    return {
+  const accounts = TOTPAccounts.map((totp) => ({
       id: totp.id,
       serviceName: totp.serviceName,
       token: totp.generate({ timestamp: performanceToUnixTime(performance) })
-    }
-  })
+    })
+  )
 
   return new Promise<Account[]>((resolve) => {
     resolve(accounts)
   })
 }
 
-export async function registerAccount(): Promise<void> {
-  // TODO: 暗号化処理を実装する
-  try {
-    // 保存ファイルパス
-    const privateKey = 'my-secret-private-key'
-    const filePath = '/workspaces/totp-desktop/passwd/encrypted-private-key.bin'
+interface OTPAuthData {
+  serviceName: string
+  issuer?: string
+  method: 'totp' | 'hotp'
+  algorithm?: 'SHA1' | 'SHA256' | 'SHA512'
+  digits?: number
+  period?: number
+}
 
-    await fs.writeFile(filePath, privateKey)
+interface OTPAuthSchema {
+  services: {
+    [key: string]: OTPAuthData
+  }
+}
+
+interface OTPAuthParsed extends OTPAuthData {
+  secret: string
+}
+
+export async function registerAccount(uri: string): Promise<boolean> {
+  // uriを解析してOTPAuthDataに変換
+  const otpauth = parseOTPAuthURI(uri)
+  if (!otpauth) {
+    return new Promise<boolean>((resolve) => resolve(false))
+  }
+
+  const secureKeyStorage = new SecureKeyStorage()
+
+  // 主キーとなるIDを生成
+  const keyId = crypto.randomUUID()
+
+  // 秘密鍵を保存
+  try {
+    if (!secureKeyStorage.saveKey(keyId, otpauth.secret)) {
+      return new Promise<boolean>((resolve) => resolve(false))
+    }
   } catch (error) {
-    throw new Error(`Good Example Error: ${error.message}`)
+    if (error instanceof Error) {
+      console.error(error.message)
+    }
+    return new Promise<boolean>((resolve) => resolve(false))
+  }
+
+  // OTPAuthスキーマ
+  const store = new Store<OTPAuthSchema>({
+    schema: {
+      services: {
+        type: 'object',
+        default: {}
+      }
+    }
+  })
+
+  // サービス情報を保存
+  try {
+    const services = store.get('services')
+    services[keyId] = {
+      serviceName: otpauth.serviceName,
+      issuer: otpauth.issuer,
+      method: otpauth.method,
+      algorithm: otpauth.algorithm,
+      digits: otpauth.digits,
+      period: otpauth.period
+    }
+    store.set('services', services)
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message)
+    }
+    return new Promise<boolean>((resolve) => resolve(false))
+  }
+
+  return new Promise<boolean>((resolve) => resolve(true))
+}
+
+function parseOTPAuthURI(uri: string): OTPAuthParsed | null {
+  try {
+    const url = new URL(uri)
+
+    // プロトコルとホスト名の検証
+    if (url.protocol !== 'otpauth:') return null
+    if (!['totp', 'hotp'].includes(url.hostname)) return null
+
+    // パスパラメータの解析
+    const serviceName = decodeURI(url.pathname).slice(1)
+
+    // クエリパラメータの解析
+    const params = new URLSearchParams(url.search)
+    const secret = params.get('secret')
+    const issuer = params.get('issuer')
+    const algorithm = params.get('algorithm') as OTPAuthParsed['algorithm']
+    const digits = Number(params.get('digits')) || undefined
+    const period = Number(params.get('period')) || undefined
+
+    return {
+      serviceName,
+      secret: secret || '',
+      issuer: issuer || undefined,
+      method: url.hostname as OTPAuthParsed['method'],
+      algorithm,
+      digits,
+      period
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message)
+    }
+    return null
   }
 }
