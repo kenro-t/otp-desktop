@@ -6,7 +6,7 @@ import { SecureKeyStorage } from '../lib/SecureKeyStorage'
 
 
 // Account はアカウント情報を表す型
-interface Account {
+export interface Account {
   id: string
   serviceName: string
   token?: string

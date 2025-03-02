@@ -18,6 +18,10 @@ function App(): JSX.Element {
     return () => getAccounts()
   }, [])
 
+  const registerAccount = async (url: string) => {
+    await window.electron.ipcRenderer.invoke('registerAccount', url)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="mx-auto max-w-2xl">
@@ -38,7 +42,7 @@ function App(): JSX.Element {
         alt="plusIcon"
         onClick={() => setIsOpen(true)}
       />
-      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} />
+      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} action={registerAccount} />
     </div>
   )
 }

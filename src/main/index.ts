@@ -3,7 +3,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
-import { getAccounts, registerAccount } from './ipc-handlers/totp'
+import { getAccounts, registerAccount, Account } from './ipc-handlers/totp'
 
 function createWindow(): void {
   // Create the browser window.
@@ -43,13 +43,14 @@ function createWindow(): void {
   }
 
   // DOM が読み込まれたらアカウント情報を取得して監視する
+  let accounts: Account[] = []
   mainWindow.webContents.on('dom-ready', async () => {
     // 初回起動時
-    const accounts = await getAccounts()
+    accounts = await getAccounts()
     mainWindow.webContents.send('accounts', accounts)
 
     // オブジェクト変更検知用Proxy
-    const watchedAccounts = accounts.map((account) => {
+    let watchedAccounts = accounts.map((account) => {
       return new Proxy(account, {
         set(target, prop, value) {
           if (prop === 'token') {
@@ -75,6 +76,20 @@ function createWindow(): void {
       }, 500)
     }
     polling()
+  })
+
+  // アカウントの登録
+  ipcMain.handle('registerAccount', async (_, uri: string) => {
+    // 登録処理
+    if (!(await registerAccount(uri))) {
+      throw new Error('アカウントの登録に失敗しました')
+    }
+
+    // 登録後、レンダラーのアカウント一覧を更新する
+    accounts = await getAccounts()
+    mainWindow.webContents.send('accounts', accounts)
+
+    return true
   })
 }
 
@@ -115,7 +130,3 @@ app.on('window-all-closed', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
-
-app.on('ready', async () => {
-  await registerAccount()
-})

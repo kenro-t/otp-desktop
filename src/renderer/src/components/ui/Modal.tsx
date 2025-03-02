@@ -1,10 +1,25 @@
 import { useState } from 'react'
 import { ModalPortal } from '../layout/ModalPortal'
 
-export const Modal = ({ isOpen, onClose }) => {
+interface ModalProps {
+  isOpen: boolean
+  onClose: () => void
+  action: (url: string) => Promise<void>
+}
+export const Modal = ({ isOpen, onClose, action }: ModalProps): JSX.Element | null => {
   const [url, setUrl] = useState<string>('')
 
   if (!isOpen) return null
+
+  // TODO: エラーハンドリング
+  const regiterAccountHandler = () => {
+    // アカウント登録の実行
+    action(url)
+    // URL欄をクリア
+    setUrl('')
+    // 閉じる
+    onClose()
+  }
 
   return (
     <ModalPortal>
@@ -25,10 +40,7 @@ export const Modal = ({ isOpen, onClose }) => {
 
         <div className="flex justify-end gap-4">
           <button
-            onClick={() => {
-              setUrl('')
-              onClose()
-            }}
+            onClick={regiterAccountHandler}
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
           >
             追加
