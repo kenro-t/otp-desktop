@@ -2,14 +2,14 @@ import { useState } from 'react'
 import { ModalPortal } from '../layout/ModalPortal'
 
 interface ModalProps {
-  isOpen: boolean
+  isResisterOpen: boolean
   onClose: () => void
   action: (url: string) => Promise<void>
 }
-export const Modal = ({ isOpen, onClose, action }: ModalProps): JSX.Element | null => {
+export const RegisterAccountModal = ({ isResisterOpen, onClose, action }: ModalProps): JSX.Element | null => {
   const [url, setUrl] = useState<string>('')
 
-  if (!isOpen) return null
+  if (!isResisterOpen) return null
 
   // TODO: エラーハンドリング
   const regiterAccountHandler = () => {
@@ -24,7 +24,6 @@ export const Modal = ({ isOpen, onClose, action }: ModalProps): JSX.Element | nu
   return (
     <ModalPortal>
       <div
-        id="content"
         className="bg-white p-4 rounded-lg shadow-lg w-full mx-10 max-w-2xl h-[40%] flex flex-col justify-around"
       >
         <div className="mb-4">
