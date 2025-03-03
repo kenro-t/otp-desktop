@@ -47,7 +47,7 @@ function createWindow(): void {
   mainWindow.webContents.on('dom-ready', async () => {
     // 初回起動時
     accounts = await getAccounts()
-    mainWindow.webContents.send('accounts', accounts)
+    mainWindow.webContents.send('/accounts', accounts)
 
     // オブジェクト変更検知用Proxy
     let watchedAccounts = accounts.map((account) => {
@@ -55,7 +55,7 @@ function createWindow(): void {
         set(target, prop, value) {
           if (prop === 'token') {
             Reflect.set(target, prop, value)
-            mainWindow.webContents.send('accounts', accounts)
+            mainWindow.webContents.send('/accounts', accounts)
             return true
           }
           return Reflect.set(target, prop, value)
@@ -79,7 +79,7 @@ function createWindow(): void {
   })
 
   // アカウントの登録
-  ipcMain.handle('registerAccount', async (_, uri: string) => {
+  ipcMain.handle('/account/register', async (_, uri: string) => {
     // 登録処理
     if (!(await registerAccount(uri))) {
       throw new Error('アカウントの登録に失敗しました')
@@ -87,7 +87,7 @@ function createWindow(): void {
 
     // 登録後、レンダラーのアカウント一覧を更新する
     accounts = await getAccounts()
-    mainWindow.webContents.send('accounts', accounts)
+    mainWindow.webContents.send('/accounts', accounts)
 
     return true
   })
