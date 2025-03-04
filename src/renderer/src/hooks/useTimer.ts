@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-import { performanceToUnixTime } from '../../../shared/utils/time'
+import { performanceToUnixTime } from '../../../lib/utils/time'
 
 export const useTimer = () => {
   const [now, setNow] = useState(performanceToUnixTime(performance))

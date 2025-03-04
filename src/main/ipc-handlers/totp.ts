@@ -1,7 +1,7 @@
 import * as OTPAuth from 'otpauth'
 import Store from 'electron-store'
 
-import { performanceToUnixTime } from '../../shared/utils/time'
+import { performanceToUnixTime } from '../../lib/utils/time'
 import { SecureKeyStorage } from '../lib/SecureKeyStorage'
 
 // Account はアカウント情報を表す型
