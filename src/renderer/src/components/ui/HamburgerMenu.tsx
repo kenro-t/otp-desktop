@@ -1,3 +1,6 @@
+import addUserIcon from '../../../../../resources/add-user.svg'
+import removeUserIcon from '../../../../../resources/remove-user.svg'
+
 interface HamburgerMenuProps {
   setIsResisterOpen: (isResisterOpen: boolean) => void
   setIsUnregister: (isUnregister: boolean) => void
@@ -13,13 +16,21 @@ export const HamburgerMenu = ({
         onClick={() => setIsResisterOpen(true)}
         className="bg-white p-4 rounded-lg shadow-lg flex flex-col justify-around cursor-pointer text-center hover:bg-gray-100 transition-colors"
       >
-        Register
+        <img
+          className="w-10 mx-auto"
+          src={addUserIcon}
+          alt="addUserIcon"
+        />
       </button>
       <button
         onClick={() => setIsUnregister(true)}
         className="bg-white p-4 rounded-lg shadow-lg flex flex-col justify-around cursor-pointer text-center hover:bg-gray-100 transition-colors"
       >
-        Unregister
+        <img
+          className="w-10 mx-auto"
+          src={removeUserIcon}
+          alt="removeUserIcon"
+        />
       </button>
     </div>
   )
