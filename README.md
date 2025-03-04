@@ -1,4 +1,4 @@
-# totp-desktop
+# otp-desktop
 
 An Electron application with React and TypeScript
 
