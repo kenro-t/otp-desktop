@@ -1,4 +1,5 @@
 import { ModalPortal } from '../layout/ModalPortal'
+import { useShowAlert } from '@renderer/hooks/useAlert'
 
 interface ModalProps {
   isUnresisterOpen: boolean
@@ -12,6 +13,8 @@ export const UnregisterAccountModal = ({
   unregisterAccount,
   targetAccount
 }: ModalProps): JSX.Element | null => {
+  const showAlert = useShowAlert()
+
   if (!isUnresisterOpen) return null
 
   const unregiterAccountHandler = async () => {
@@ -20,7 +23,7 @@ export const UnregisterAccountModal = ({
       await unregisterAccount(targetAccount)
     } catch (error) {
       if (error instanceof Error) {
-        alert(error.message)
+        showAlert(error.message)
       }
     }
     // 閉じる

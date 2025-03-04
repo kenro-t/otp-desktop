@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { ModalPortal } from '../layout/ModalPortal'
+import {parseAndValidateOtpAuthUri} from '../../../../lib/schemas'
+import { useShowAlert } from '@renderer/hooks/useAlert'
 
-interface ModalProps {
+interface RegisterAccountModalProps {
   isResisterOpen: boolean
   onClose: () => void
   registerAccount: (url: string) => Promise<void>
@@ -10,24 +12,40 @@ export const RegisterAccountModal = ({
   isResisterOpen,
   onClose,
   registerAccount
-}: ModalProps): JSX.Element | null => {
+}: RegisterAccountModalProps): JSX.Element | null => {
+  const showAlert = useShowAlert()
   const [url, setUrl] = useState<string>('')
 
   if (!isResisterOpen) return null
 
   const regiterAccountHandler = async () => {
+    // urlの検証
+    try {
+      parseAndValidateOtpAuthUri(url)
+    } catch (error) {
+      if (error instanceof Error) {
+        showAlert('invalid otpauth url')
+      }
+      return
+    }
+
     // アカウント登録の実行
     try {
       await registerAccount(url)
     } catch (error) {
       if (error instanceof Error) {
-        alert(error.message)
+        showAlert(error.message)
       }
     }
     // URL欄をクリア
     setUrl('')
     // 閉じる
     onClose()
+  }
+
+  const closeHandler = () => {
+    onClose()
+    setUrl('')
   }
 
   return (
@@ -52,7 +70,7 @@ export const RegisterAccountModal = ({
             追加
           </button>
           <button
-            onClick={onClose}
+            onClick={closeHandler}
             className="px-4 py-2 text-gray-600 bg-gray-200 hover:bg-gray-300 rounded cursor-pointer"
           >
             キャンセル

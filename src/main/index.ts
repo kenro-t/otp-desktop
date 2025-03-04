@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -105,6 +105,11 @@ function createWindow(): void {
 
     return true
   })
+
+  // アラート表示
+  ipcMain.handle('/show-alert', (_, ...messages) => {
+    dialog.showErrorBox('error', messages.join('\n'));
+  });
 }
 
 // This method will be called when Electron has finished
