@@ -6,7 +6,7 @@ import { UnregisterAccountModal } from './components/ui/UnregisterAccountModal'
 import { HamburgerMenu } from './components/ui/HamburgerMenu'
 import { useTimer } from './hooks/useTimer'
 import { TOTPEntry } from './types'
-import checkIcon from '../../../resources/check.svg'
+import crossIcon from '../../../resources/cross.svg'
 import menuIcon from '../../../resources/menu.svg'
 
 function App(): JSX.Element {
@@ -15,8 +15,10 @@ function App(): JSX.Element {
   const [isUnresisterOpen, setIsUnresisterOpen] = useState<boolean>(false)
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false)
   const [isUnregister, setIsUnregister] = useState<boolean>(false)
+  const [targetAccount, setTargetAccount] = useState<string>('')
   const { timeKey, getRemainingTime } = useTimer()
   const menuRef = useRef<HTMLImageElement>(null)
+
   useEffect(() => {
     const getAccounts = window.electron.ipcRenderer.on('/accounts', (_, account) => {
       setEntries(account)
@@ -55,6 +57,7 @@ function App(): JSX.Element {
               timeKey={timeKey}
               isUnregister={isUnregister}
               setIsUnresisterOpen={setIsUnresisterOpen}
+              setTargetAccount={setTargetAccount}
             />
           ))}
         </div>
@@ -70,9 +73,9 @@ function App(): JSX.Element {
         />
       ) : (
         <img
-          className="w-15 fixed right-5 bottom-10 cursor-pointer bg-white rounded-full border border-red-600"
-          src={checkIcon}
-          alt="checkIcon"
+          className="w-15 fixed right-5 bottom-10 cursor-pointer bg-white rounded-full"
+          src={crossIcon}
+          alt="crossIcon"
           onClick={() => setIsUnregister(false)}
         />
       )}
@@ -82,12 +85,13 @@ function App(): JSX.Element {
       <RegisterAccountModal
         isResisterOpen={isResisterOpen}
         onClose={() => setIsResisterOpen(false)}
-        action={registerAccount}
+        registerAccount={registerAccount}
       />
       <UnregisterAccountModal
         isUnresisterOpen={isUnresisterOpen}
         onClose={() => setIsUnresisterOpen(false)}
-        action={unregisterAccount}
+        unregisterAccount={unregisterAccount}
+        targetAccount={targetAccount}
       />
     </div>
   )

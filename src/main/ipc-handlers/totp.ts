@@ -4,7 +4,6 @@ import Store from 'electron-store'
 import { performanceToUnixTime } from '../../shared/utils/time'
 import { SecureKeyStorage } from '../lib/SecureKeyStorage'
 
-
 // Account はアカウント情報を表す型
 export interface Account {
   id: string
@@ -53,11 +52,10 @@ export async function getAccounts(): Promise<Account[]> {
   }) as TOTP[]
 
   const accounts = TOTPAccounts.map((totp) => ({
-      id: totp.id,
-      serviceName: totp.serviceName,
-      token: totp.generate({ timestamp: performanceToUnixTime(performance) })
-    })
-  )
+    id: totp.id,
+    serviceName: totp.serviceName,
+    token: totp.generate({ timestamp: performanceToUnixTime(performance) })
+  }))
 
   return new Promise<Account[]>((resolve) => {
     resolve(accounts)
@@ -129,6 +127,41 @@ export async function registerAccount(uri: string): Promise<boolean> {
       period: otpauth.period
     }
     store.set('services', services)
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message)
+    }
+    return new Promise<boolean>((resolve) => resolve(false))
+  }
+
+  return new Promise<boolean>((resolve) => resolve(true))
+}
+
+export async function unregisterAccount(id: string): Promise<boolean> {
+  // OTPAuthスキーマ
+  const store = new Store<OTPAuthSchema>({
+    schema: {
+      services: {
+        type: 'object',
+        default: {}
+      }
+    }
+  })
+
+  const secureKeyStorage = new SecureKeyStorage()
+
+  try {
+    // 秘密鍵を削除
+    secureKeyStorage.deleteKey(id)
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message)
+    }
+    return new Promise<boolean>((resolve) => resolve(false))
+  }
+
+  try {
+    store.delete(`services.${id}`)
   } catch (error) {
     if (error instanceof Error) {
       console.error(error.message)

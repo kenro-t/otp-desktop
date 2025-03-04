@@ -7,6 +7,7 @@ type TOTPEntryItemProps = {
   timeKey: number
   isUnregister: boolean
   setIsUnresisterOpen: (isOpen: boolean) => void
+  setTargetAccount: (targetAccount: string) => void
 }
 
 export const TOTPEntryItem = ({
@@ -14,7 +15,8 @@ export const TOTPEntryItem = ({
   remainingTime,
   timeKey,
   isUnregister = false,
-  setIsUnresisterOpen
+  setIsUnresisterOpen,
+  setTargetAccount
 }: TOTPEntryItemProps) => {
   const { handleCopy } = useCopyToClipboard()
 
@@ -23,6 +25,7 @@ export const TOTPEntryItem = ({
       {isUnregister && (
         <button
           onClick={() => {
+            setTargetAccount(entry.id)
             //  モーダルの呼出
             setIsUnresisterOpen(true)
           }}

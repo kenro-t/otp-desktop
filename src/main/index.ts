@@ -3,7 +3,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
-import { getAccounts, registerAccount, Account } from './ipc-handlers/totp'
+import { getAccounts, registerAccount, unregisterAccount, Account } from './ipc-handlers/totp'
 
 function createWindow(): void {
   // Create the browser window.
@@ -86,6 +86,20 @@ function createWindow(): void {
     }
 
     // 登録後、レンダラーのアカウント一覧を更新する
+    accounts = await getAccounts()
+    mainWindow.webContents.send('/accounts', accounts)
+
+    return true
+  })
+
+  // アカウントの削除
+  ipcMain.handle('/account/unregister', async (_, id: string) => {
+    // 削除処理
+    if (!(await unregisterAccount(id))) {
+      throw new Error('アカウントの削除に失敗しました')
+    }
+
+    // 削除後、レンダラーのアカウント一覧を更新する
     accounts = await getAccounts()
     mainWindow.webContents.send('/accounts', accounts)
 

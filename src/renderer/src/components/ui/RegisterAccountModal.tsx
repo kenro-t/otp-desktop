@@ -4,17 +4,26 @@ import { ModalPortal } from '../layout/ModalPortal'
 interface ModalProps {
   isResisterOpen: boolean
   onClose: () => void
-  action: (url: string) => Promise<void>
+  registerAccount: (url: string) => Promise<void>
 }
-export const RegisterAccountModal = ({ isResisterOpen, onClose, action }: ModalProps): JSX.Element | null => {
+export const RegisterAccountModal = ({
+  isResisterOpen,
+  onClose,
+  registerAccount
+}: ModalProps): JSX.Element | null => {
   const [url, setUrl] = useState<string>('')
 
   if (!isResisterOpen) return null
 
-  // TODO: エラーハンドリング
-  const regiterAccountHandler = () => {
+  const regiterAccountHandler = async () => {
     // アカウント登録の実行
-    action(url)
+    try {
+      await registerAccount(url)
+    } catch (error) {
+      if (error instanceof Error) {
+        alert(error.message)
+      }
+    }
     // URL欄をクリア
     setUrl('')
     // 閉じる
@@ -23,9 +32,7 @@ export const RegisterAccountModal = ({ isResisterOpen, onClose, action }: ModalP
 
   return (
     <ModalPortal>
-      <div
-        className="bg-white p-4 rounded-lg shadow-lg w-full mx-10 max-w-2xl h-[40%] flex flex-col justify-around"
-      >
+      <div className="bg-white p-4 rounded-lg shadow-lg w-full mx-10 max-w-2xl h-[40%] flex flex-col justify-around">
         <div className="mb-4">
           <label className="block text-sm font-medium font-bold text-gray-700 mb-1">URL</label>
           <input

@@ -11,15 +11,15 @@ export const HamburgerMenu = ({
     <div className="fixed right-5 bottom-28 gap-1 flex flex-col">
       <button
         onClick={() => setIsResisterOpen(true)}
-        className="bg-white p-4 rounded-lg shadow-lg flex flex-col justify-around cursor-pointer text-center"
+        className="bg-white p-4 rounded-lg shadow-lg flex flex-col justify-around cursor-pointer text-center hover:bg-gray-100 transition-colors"
       >
-        Register Account
+        Register
       </button>
       <button
         onClick={() => setIsUnregister(true)}
-        className="bg-white p-4 rounded-lg shadow-lg flex flex-col justify-around cursor-pointer text-center"
+        className="bg-white p-4 rounded-lg shadow-lg flex flex-col justify-around cursor-pointer text-center hover:bg-gray-100 transition-colors"
       >
-        Unregister Account
+        Unregister
       </button>
     </div>
   )

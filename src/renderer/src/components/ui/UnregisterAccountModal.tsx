@@ -1,32 +1,40 @@
 import { ModalPortal } from '../layout/ModalPortal'
 
 interface ModalProps {
-    isUnresisterOpen: boolean
+  isUnresisterOpen: boolean
   onClose: () => void
-  action: (url: string) => Promise<void>
+  unregisterAccount: (url: string) => Promise<void>
+  targetAccount: string
 }
-export const UnregisterAccountModal = ({ isUnresisterOpen, onClose, action }: ModalProps): JSX.Element | null => {
-
+export const UnregisterAccountModal = ({
+  isUnresisterOpen,
+  onClose,
+  unregisterAccount,
+  targetAccount
+}: ModalProps): JSX.Element | null => {
   if (!isUnresisterOpen) return null
 
-  // TODO: エラーハンドリング
-  const unregiterAccountHandler = () => {
-    // アカウント登録の実行
-    // action(url)
+  const unregiterAccountHandler = async () => {
+    // 削除の実行
+    try {
+      await unregisterAccount(targetAccount)
+    } catch (error) {
+      if (error instanceof Error) {
+        alert(error.message)
+      }
+    }
     // 閉じる
     onClose()
   }
 
   return (
     <ModalPortal>
-      <div
-        className="bg-white p-4 rounded-lg shadow-lg w-full mx-10 max-w-2xl h-[40%] flex flex-col justify-around"
-      >
+      <div className="bg-white p-4 rounded-lg shadow-lg w-full mx-10 max-w-2xl h-[40%] flex flex-col justify-around">
         Are you sure you want to delete your account?
         <div className="flex justify-end gap-4">
           <button
             onClick={unregiterAccountHandler}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
+            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 cursor-pointer"
           >
             Delete
           </button>
