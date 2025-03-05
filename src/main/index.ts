@@ -4,14 +4,15 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
 import { getAccounts, registerAccount, unregisterAccount, Account } from './ipc-handlers/totp'
+import { createWatchedAccounts } from './utils'
 
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    // width: 900,
-    // height: 670,
-    width: 1200,
+    width: 400,
     height: 670,
+    // width: 1200,
+    // height: 670,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -44,24 +45,14 @@ function createWindow(): void {
 
   // DOM が読み込まれたらアカウント情報を取得して監視する
   let accounts: Account[] = []
+  let watchedAccounts: Account[] = []
   mainWindow.webContents.on('dom-ready', async () => {
     // 初回起動時
     accounts = await getAccounts()
     mainWindow.webContents.send('/accounts', accounts)
 
     // オブジェクト変更検知用Proxy
-    let watchedAccounts = accounts.map((account) => {
-      return new Proxy(account, {
-        set(target, prop, value) {
-          if (prop === 'token') {
-            Reflect.set(target, prop, value)
-            mainWindow.webContents.send('/accounts', accounts)
-            return true
-          }
-          return Reflect.set(target, prop, value)
-        }
-      })
-    })
+    watchedAccounts = createWatchedAccounts(accounts, mainWindow)
 
     // 500ms ごとにアカウント情報を取得して監視する
     const polling = () => {
@@ -85,9 +76,12 @@ function createWindow(): void {
       throw new Error('アカウントの登録に失敗しました')
     }
 
-    // 登録後、レンダラーのアカウント一覧を更新する
+    // レンダラーのアカウント一覧表示を更新
     accounts = await getAccounts()
     mainWindow.webContents.send('/accounts', accounts)
+
+    // メインの監視対象を更新
+    watchedAccounts = createWatchedAccounts(accounts, mainWindow)
 
     return true
   })
@@ -108,8 +102,8 @@ function createWindow(): void {
 
   // アラート表示
   ipcMain.handle('/show-alert', (_, ...messages) => {
-    dialog.showErrorBox('error', messages.join('\n'));
-  });
+    dialog.showErrorBox('error', messages.join('\n'))
+  })
 }
 
 // This method will be called when Electron has finished
