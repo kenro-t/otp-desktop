@@ -12,7 +12,7 @@ export const RegisterAccountModal = ({
   isResisterOpen,
   onClose,
   registerAccount
-}: RegisterAccountModalProps): JSX.Element | null => {
+}: RegisterAccountModalProps): React.JSX.Element | null => {
   const showAlert = useShowAlert()
   const [url, setUrl] = useState<string>('')
 

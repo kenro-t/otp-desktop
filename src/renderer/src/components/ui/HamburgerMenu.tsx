@@ -9,7 +9,7 @@ interface HamburgerMenuProps {
 export const HamburgerMenu = ({
   setIsResisterOpen,
   setIsUnregister
-}: HamburgerMenuProps): JSX.Element | null => {
+}: HamburgerMenuProps): React.JSX.Element | null => {
   return (
     <div className="fixed right-5 bottom-28 gap-1 flex flex-col">
       <button

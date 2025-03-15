@@ -12,7 +12,7 @@ export const UnregisterAccountModal = ({
   onClose,
   unregisterAccount,
   targetAccount
-}: ModalProps): JSX.Element | null => {
+}: ModalProps): React.JSX.Element | null => {
   const showAlert = useShowAlert()
 
   if (!isUnresisterOpen) return null
