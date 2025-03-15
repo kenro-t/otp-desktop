@@ -1,9 +1,9 @@
 import { z } from 'zod'
 
-// Base32バリデーション用の正規表現（パディングなし）
-const base32Regex = /^[A-Z2-7]+$/
+// Base32バリデーション（大文字小文字を無視、パディング付き対応）
+const base32Regex = /^[A-Z2-7]+=*$/i
 
-// OTPAuth URIのパース済みオブジェクト用スキーマ
+// OTPAuth URIスキーマ
 const otpAuthSchema = z
   .object({
     type: z.literal('totp'), // typeがtotpか確認
@@ -11,46 +11,53 @@ const otpAuthSchema = z
       issuer: z.string().min(1), // ラベルのIssuer（空文字禁止）
       user: z.string().min(1) // ユーザー名（空文字禁止）
     }),
-    secret: z.string().regex(base32Regex, {
-      message: 'Invalid Base32 format for secret'
+    secret: z.string({
+      required_error: 'Secret is required'
+    }).regex(base32Regex, {
+      message: 'Invalid Base32 format'
     }),
-    issuer: z.string().min(1) // クエリのIssuer（空文字禁止）
+    issuer: z.string().min(1).optional()
   })
   .refine(
-    (data) => data.label.issuer === data.issuer,
+    (data) => !data.issuer || data.label.issuer === data.issuer,
     'Issuer in query does not match label issuer'
   )
 
-export function parseAndValidateOtpAuthUri(uri: string): z.infer<typeof otpAuthSchema> | void {
+export function parseAndValidateOtpAuthUri(uri: string): z.infer<typeof otpAuthSchema> {
   try {
     const url = new URL(uri)
 
-    // プロトコルとタイプのチェック
+    // プロトコルチェック
     if (url.protocol !== 'otpauth:') throw new Error('Invalid protocol')
     if (url.hostname !== 'totp') throw new Error('Invalid type')
 
-    // ラベルのデコードと分割
+    // ラベル部の処理
     const decodedPath = decodeURIComponent(url.pathname.slice(1))
-    const [labelIssuer, ...userParts] = decodedPath.split(':')
-    const user = userParts.join(':')
+    const colonIndex = decodedPath.indexOf(':')
+    
+    if (colonIndex === -1) throw new Error('Invalid label format')
+    
+    const labelIssuer = decodedPath.slice(0, colonIndex)
+    const user = decodedPath.slice(colonIndex + 1)
 
-    // クエリパラメータの抽出
+    // クエリパラメータ
     const secret = url.searchParams.get('secret')
     const issuer = url.searchParams.get('issuer')
 
-    // オブジェクトの生成
+    // オブジェクト構築
     const parsedData = {
       type: 'totp',
       label: { issuer: labelIssuer, user },
       secret,
-      issuer
+      issuer: issuer ?? undefined // undefinedに統一
     }
 
-    // Zodでバリデーション
     return otpAuthSchema.parse(parsedData)
+
   } catch (error) {
     if (error instanceof Error) {
-      throw new Error(`Invalid OTPAuth URI: ${error.message}`)
+      throw new Error(`OTPAuth URI Validation Failed: ${error.message}`)
     }
+    throw new Error('Unknown error occurred')
   }
 }
