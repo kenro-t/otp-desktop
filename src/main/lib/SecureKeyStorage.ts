@@ -27,6 +27,7 @@ export class SecureKeyStorage {
   saveKey(keyId: string, secretKey: string): boolean {
     try {
       if (!safeStorage.isEncryptionAvailable()) {
+        log.error('Encryption is not available')
         throw new Error('システムの暗号化機能が利用できません')
       }
 

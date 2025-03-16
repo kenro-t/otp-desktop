@@ -97,11 +97,12 @@ export async function registerAccount(uri: string): Promise<boolean> {
   // 秘密鍵を保存
   try {
     if (!secureKeyStorage.saveKey(keyId, otpauth.secret)) {
+      log.error(`Failed to save key ${keyId}`);
       return new Promise<boolean>((resolve) => resolve(false))
     }
   } catch (error) {
     if (error instanceof Error) {
-      console.error(error.message)
+      log.error(`Failed to save key ${keyId}: ${error.message}\n${error.stack}`);
     }
     return new Promise<boolean>((resolve) => resolve(false))
   }
@@ -130,7 +131,7 @@ export async function registerAccount(uri: string): Promise<boolean> {
     store.set('services', services)
   } catch (error) {
     if (error instanceof Error) {
-      console.error(error.message)
+      log.error(`Failed to service info ${keyId}: ${error.message}\n${error.stack}`);
     }
     return new Promise<boolean>((resolve) => resolve(false))
   }
@@ -156,7 +157,7 @@ export async function unregisterAccount(id: string): Promise<boolean> {
     secureKeyStorage.deleteKey(id)
   } catch (error) {
     if (error instanceof Error) {
-      console.error(error.message)
+      log.error(`Failed to delete key ${id}: ${error.message}\n${error.stack}`);
     }
     return new Promise<boolean>((resolve) => resolve(false))
   }
@@ -165,7 +166,7 @@ export async function unregisterAccount(id: string): Promise<boolean> {
     store.delete(`services.${id}`)
   } catch (error) {
     if (error instanceof Error) {
-      console.error(error.message)
+      log.error(`Failed to delete service info ${id}: ${error.message}\n${error.stack}`);
     }
     return new Promise<boolean>((resolve) => resolve(false))
   }
