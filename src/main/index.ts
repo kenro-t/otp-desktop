@@ -2,6 +2,7 @@ import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import log from 'electron-log'
 
 import { getAccounts, registerAccount, unregisterAccount, Account } from './ipc-handlers/totp'
 import { createWatchedAccounts } from './utils'
@@ -116,6 +117,9 @@ function createWindow(): void {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  log.initialize();
+  log.info('start launching the app');
+
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
@@ -141,6 +145,7 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
+    log.info('exit launching the app');
   }
 })
 

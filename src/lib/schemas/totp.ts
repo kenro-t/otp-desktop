@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import log from 'electron-log'
 
 // Base32バリデーション（大文字小文字を無視、パディング付き対応）
 const base32Regex = /^[A-Z2-7]+=*$/i
@@ -56,8 +57,10 @@ export function parseAndValidateOtpAuthUri(uri: string): z.infer<typeof otpAuthS
 
   } catch (error) {
     if (error instanceof Error) {
+      log.error(`OTPAuth URI Validation Failed: ${error.message}`)
       throw new Error(`OTPAuth URI Validation Failed: ${error.message}`)
     }
+    log.error('Unknown error occurred')
     throw new Error('Unknown error occurred')
   }
 }

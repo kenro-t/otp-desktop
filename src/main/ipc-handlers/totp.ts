@@ -1,5 +1,6 @@
 import * as OTPAuth from 'otpauth'
 import Store from 'electron-store'
+import log from 'electron-log'
 
 import { performanceToUnixTime } from '../../lib/utils/time'
 import { SecureKeyStorage } from '../lib/SecureKeyStorage'
@@ -202,7 +203,7 @@ function parseOTPAuthURI(uri: string): OTPAuthParsed | null {
     }
   } catch (error) {
     if (error instanceof Error) {
-      console.error(error.message)
+      log.error(error.message)
     }
     return null
   }

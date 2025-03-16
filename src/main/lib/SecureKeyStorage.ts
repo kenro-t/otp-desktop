@@ -1,5 +1,6 @@
 import { safeStorage } from 'electron'
 import Store from 'electron-store'
+import log from 'electron-log'
 
 // ストアのスキーマ定義
 interface SecureStoreSchema {
@@ -42,7 +43,7 @@ export class SecureKeyStorage {
 
       return true
     } catch (error) {
-      console.error('鍵の保存に失敗しました:', error)
+      log.error('鍵の保存に失敗しました:', error)
       return false
     }
   }
@@ -63,7 +64,7 @@ export class SecureKeyStorage {
       // 復号
       return safeStorage.decryptString(encryptedBuffer)
     } catch (error) {
-      console.error('鍵の取得に失敗しました:', error)
+      log.error('鍵の取得に失敗しました:', error)
       return null
     }
   }
@@ -79,7 +80,7 @@ export class SecureKeyStorage {
       }
       return false
     } catch (error) {
-      console.error('鍵の削除に失敗しました:', error)
+      log.error('鍵の削除に失敗しました:', error)
       return false
     }
   }
@@ -90,7 +91,7 @@ export class SecureKeyStorage {
       const encryptedKeys = this.store.get('encryptedKeys')
       return Object.keys(encryptedKeys)
     } catch (error) {
-      console.error('キーIDの取得に失敗しました:', error)
+      log.error('キーIDの取得に失敗しました:', error)
       return []
     }
   }
