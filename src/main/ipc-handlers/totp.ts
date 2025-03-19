@@ -209,7 +209,7 @@ function parseOTPAuthURI(uri: string): OTPAuthParsed | null {
     // パスパラメータの解析
     const serviceName = decodeURI(url.pathname).slice(1)
     if (!serviceName) return null
-    const serviceNameRegex = /^[a-zA-Z0-9_-]+$/
+    const serviceNameRegex = /^[a-zA-Z0-9_-]{1,64}$/
     if (!serviceNameRegex.test(serviceName)) return null
 
     // クエリパラメータの解析
