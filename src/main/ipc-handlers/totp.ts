@@ -86,26 +86,19 @@ export async function registerAccount(uri: string): Promise<boolean> {
   // uriを解析してOTPAuthDataに変換
   const otpauth = parseOTPAuthURI(uri)
   if (!otpauth) {
-    return new Promise<boolean>((resolve) => resolve(false))
+    return new Promise<boolean>((resolve, reject) => {
+      try {
+        resolve(false)
+      } catch (error) {
+        if (error instanceof Error) {
+          log.error(error.message)
+        }
+        reject(error)
+      }
+    })
   }
 
   const secureKeyStorage = new SecureKeyStorage()
-
-  // 主キーとなるIDを生成
-  const keyId = crypto.randomUUID()
-
-  // 秘密鍵を保存
-  try {
-    if (!secureKeyStorage.saveKey(keyId, otpauth.secret)) {
-      log.error(`Failed to save key ${keyId}`);
-      return new Promise<boolean>((resolve) => resolve(false))
-    }
-  } catch (error) {
-    if (error instanceof Error) {
-      log.error(`Failed to save key ${keyId}: ${error.message}\n${error.stack}`);
-    }
-    return new Promise<boolean>((resolve) => resolve(false))
-  }
 
   // OTPAuthスキーマ
   const store = new Store<OTPAuthSchema>({
@@ -117,26 +110,46 @@ export async function registerAccount(uri: string): Promise<boolean> {
     }
   })
 
-  // サービス情報を保存
-  try {
-    const services = store.get('services')
-    services[keyId] = {
-      serviceName: otpauth.serviceName,
-      issuer: otpauth.issuer,
-      method: otpauth.method,
-      algorithm: otpauth.algorithm,
-      digits: otpauth.digits,
-      period: otpauth.period
-    }
-    store.set('services', services)
-  } catch (error) {
-    if (error instanceof Error) {
-      log.error(`Failed to service info ${keyId}: ${error.message}\n${error.stack}`);
-    }
-    return new Promise<boolean>((resolve) => resolve(false))
-  }
+  // 主キーとなるIDを生成
+  const keyId = crypto.randomUUID()
 
-  return new Promise<boolean>((resolve) => resolve(true))
+  return new Promise<boolean>((resolve, reject) => {
+    // 秘密鍵を保存
+    try {
+      if (!secureKeyStorage.saveKey(keyId, otpauth.secret)) {
+        log.error(`Failed to save key ${keyId}`)
+        reject(new Error(`Failed to save key ${keyId}`))
+      }
+    } catch (error) {
+      log.error(`Error saving key ${keyId}: ${error}`)
+      reject(error)
+    }
+
+    // サービス情報を保存
+    try {
+      const services = store.get('services')
+      services[keyId] = {
+        serviceName: otpauth.serviceName,
+        issuer: otpauth.issuer,
+        method: otpauth.method,
+        algorithm: otpauth.algorithm,
+        digits: otpauth.digits,
+        period: otpauth.period
+      }
+      store.set('services', services)
+    } catch (error) {
+      if (error instanceof Error) {
+        log.error(`Failed to service info ${keyId}: ${error.message}\n${error.stack}`)
+        reject(`Failed to service info ${keyId}: ${error.message}\n${error.stack}`)
+      } else {
+        log.error(`Unknown error occurred: ${JSON.stringify(error)}`)
+        reject('Unknown error occurred')
+      }
+    }
+
+    // 処理成功
+    resolve(true)
+  })
 }
 
 export async function unregisterAccount(id: string): Promise<boolean> {
@@ -152,26 +165,34 @@ export async function unregisterAccount(id: string): Promise<boolean> {
 
   const secureKeyStorage = new SecureKeyStorage()
 
-  try {
-    // 秘密鍵を削除
-    secureKeyStorage.deleteKey(id)
-  } catch (error) {
-    if (error instanceof Error) {
-      log.error(`Failed to delete key ${id}: ${error.message}\n${error.stack}`);
+  return new Promise<boolean>((resolve, reject) => {
+    try {
+      // 秘密鍵を削除
+      secureKeyStorage.deleteKey(id)
+    } catch (error) {
+      if (error instanceof Error) {
+        log.error(`Failed to delete key ${id}: ${error.message}\n${error.stack}`)
+        reject(`Failed to delete key ${id}: ${error.message}\n${error.stack}`)
+      } else {
+        log.error(`Unknown error occurred: ${JSON.stringify(error)}`)
+        reject('Unknown error occurred')
+      }
     }
-    return new Promise<boolean>((resolve) => resolve(false))
-  }
 
-  try {
-    store.delete(`services.${id}`)
-  } catch (error) {
-    if (error instanceof Error) {
-      log.error(`Failed to delete service info ${id}: ${error.message}\n${error.stack}`);
+    try {
+      store.delete(`services.${id}`)
+    } catch (error) {
+      if (error instanceof Error) {
+        log.error(`Failed to delete service info ${id}: ${error.message}\n${error.stack}`)
+        reject(`Failed to delete service info ${id}: ${error.message}\n${error.stack}`)
+      } else {
+        log.error(`Unknown error occurred: ${JSON.stringify(error)}`)
+        reject('Unknown error occurred')
+      }
     }
-    return new Promise<boolean>((resolve) => resolve(false))
-  }
-
-  return new Promise<boolean>((resolve) => resolve(true))
+    // 処理成功
+    resolve(true)
+  })
 }
 
 function parseOTPAuthURI(uri: string): OTPAuthParsed | null {
