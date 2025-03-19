@@ -91,9 +91,12 @@ export async function registerAccount(uri: string): Promise<boolean> {
         resolve(false)
       } catch (error) {
         if (error instanceof Error) {
-          log.error(error.message)
+          log.error(`Failed to parse OTPAuth URI: ${error.message}\n${error.stack}`)
+          reject(new Error(`Invalid OTPAuth URI: ${error.message}`))
+        } else {
+          log.error(`Unknown error occurred: ${JSON.stringify(error)}`)
+          reject(new Error('Unknown error occurred'))
         }
-        reject(error)
       }
     })
   }
