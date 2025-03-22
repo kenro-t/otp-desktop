@@ -58,9 +58,9 @@ export function parseAndValidateOtpAuthUri(uri: string): z.infer<typeof otpAuthS
   } catch (error) {
     if (error instanceof Error) {
       log.error(`OTPAuth URI Validation Failed: ${error.message}\n${error.stack}`)
-      throw error;
+      throw new Error(`OTPAuth URI Validation Failed: ${error.message}`); // Re-throw with original message
     }
     log.error(`Unknown error occurred: ${JSON.stringify(error)}`)
-    throw new Error('Unknown error occurred')
+    throw new Error('OTPAuth URI Validation Failed: An unknown error occurred'); // Use a more specific error message
   }
 }
