@@ -1,0 +1,25 @@
+{
+	"name": "otp-desktop-dev",
+	"dockerFile": "./Dockerfile",
+	"postAttachCommand": "/bin/bash -c 'source .devcontainer/startup.sh'",
+	"remoteUser": "root",
+	"remoteEnv": {
+		"DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/0/bus"
+	},
+	"mounts": [
+		"source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,consistency=cached"
+	],
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"golang.go",
+				"streetsidesoftware.code-spell-checker",
+				"eamodio.gitlens",
+				"ms-azuretools.vscode-docker",
+				"esbenp.prettier-vscode",
+				"redhat.vscode-yaml",
+				"github.copilot"
+			]
+		}
+	}
+}
