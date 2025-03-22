@@ -171,7 +171,10 @@ export async function unregisterAccount(id: string): Promise<boolean> {
   return new Promise<boolean>((resolve, reject) => {
     try {
       // 秘密鍵を削除
-      secureKeyStorage.deleteKey(id)
+      if(!secureKeyStorage.deleteKey(id)) {
+        log.error(`Failed to delete key ${id}`)
+        reject(new Error(`Failed to delete key ${id}`))
+      }
     } catch (error) {
       if (error instanceof Error) {
         log.error(`Failed to delete key ${id}: ${error.message}\n${error.stack}`)
