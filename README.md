@@ -1,34 +1,54 @@
-# otp-desktop
+# OTP Desktop
 
-An Electron application with React and TypeScript
+[![GitHub License](https://img.shields.io/github/license/kenro-t/otp-desktop)](https://github.com/kenro-t/otp-desktop/blob/main/LICENSE)
+[![GitHub Stars](https://img.shields.io/github/stars/kenro-t/otp-desktop)](https://github.com/kenro-t/otp-desktop/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/kenro-t/otp-desktop)](https://github.com/kenro-t/otp-desktop/network/members)
+[![GitHub Issues](https://img.shields.io/github/issues/kenro-t/otp-desktop)](https://github.com/kenro-t/otp-desktop/issues)
+[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/kenro-t/otp-desktop)](https://github.com/kenro-t/otp-desktop/pulls)
 
-## Recommended IDE Setup
+OTP Desktopは、デスクトップ環境で動作する、使いやすいワンタイムパスワード（OTP）ジェネレーターアプリケーションです。このアプリケーションを使用することで、ウェブサイトやサービスへのログイン時に必要なOTPを簡単に生成し、セキュリティを強化することができます。
 
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+<!-- ![screenshot](ここにスクリーンショットへのリンクを記述) -->
 
-## Project Setup
+## 特徴
 
-### Install
+*   **使いやすいインターフェース:** シンプルで直感的なデザインで、簡単にOTPを生成できます。
+*   **コピー＆ペースト:** 生成されたOTPは、ワンクリックでクリップボードにコピーできます。
+*   **オフライン動作:** インターネット接続がなくてもOTPを生成できます。
+*   **セキュリティ:** シークレットキーはローカルに暗号化して保存されます。
 
-```bash
-$ npm install
-```
+## インストール
 
-### Development
+準備中…
 
-```bash
-$ npm run dev
-```
+<!-- 1.  [リリースページ](ここにリリースページへのリンクを記述)から、お使いのOSに合ったインストーラーをダウンロードします。
+    *(例: [リリースページ](https://github.com/kenro-t/otp-desktop/releases))*
+2.  ダウンロードしたインストーラーを実行し、指示に従ってインストールします。 -->
 
-### Build
+## 使い方
 
-```bash
-# For windows
-$ npm run build:win
+準備中…
 
-# For macOS
-$ npm run build:mac
+<!-- 1.  アプリケーションを起動します。
+2.  「Add Account」ボタンをクリックし、アカウント名とシークレットキーを入力します。
+3.  アカウントリストから、OTPを生成したいアカウントを選択します。
+4.  表示されたOTPをコピーし、ウェブサイトやサービスに貼り付けます。 -->
 
-# For Linux
-$ npm run build:linux
-```
+## 開発環境
+
+*   **言語:** TypeScript
+*   **フレームワーク/ライブラリ:**
+    *   Electron
+    *   Vite
+    *   React
+    *   electron-vite
+    *   Tailwind CSS
+*   **パッケージマネージャー:** npm
+
+## ライセンス
+
+このプロジェクトは[MIT License](https://github.com/kenro-t/otp-desktop/blob/main/LICENSE)ライセンスの下で公開されています。
+
+## 連絡先
+
+kenro-t
